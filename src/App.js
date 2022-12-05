@@ -14,17 +14,13 @@ var clock = new THREE.Clock();
 
 const WaveShaderMaterial = shaderMaterial(
   // Uniform
-  { uTime: 0, uColor: new THREE.Color(0.0, 0.0, 0.0), uTexture: new THREE.Texture(), }, 
+  { uTime: 0, uColor: new THREE.Color(0.0, 0.0, 0.0) }, 
   // Vertex Shader
   glsl`
     precision mediump float;
-
     varying vec2 vUv;
-
     uniform float uTime;
-
-    #pragma glslify: snoise3 = require(glsl-noise/simplex/3d); 
-
+    #pragma glslify: snoise3 = require(glsl-noise/simplex/3d);
     void main() {
       vUv = uv;
       
@@ -33,23 +29,17 @@ const WaveShaderMaterial = shaderMaterial(
       float noiseAmp = 0.25;
       vec3 noisePos = vec3(pos.x * noiseFreq + uTime, pos.y, pos.z);
       pos.x += snoise3(noisePos) * noiseAmp;
-
       gl_Position = projectionMatrix * modelViewMatrix * vec4 (pos, 1.0);
     }
   `, 
   // Fragment shader
   glsl`
     precision mediump float;
-
     uniform vec3 uColor;
     uniform float uTime;
-    uniform sampler2D uTexture;
-
     varying vec2 vUv;
-
     void main() {
-      vec3 texture = texture2D(uTexture, vUv).rgb;
-      gl_FragColor = vec4(texture, 1.0);
+      gl_FragColor = vec4(sin(vUv.x + uTime), 0.8, 0.7, 0.5);
     }
   `
 );
@@ -60,24 +50,18 @@ const GradientShaderMaterial = shaderMaterial(
   // Vertex Shader
   glsl`
     precision mediump float;
-
     varying vec2 vUv;
-
     void main() {
       vUv = uv;
-
       gl_Position = projectionMatrix * modelViewMatrix * vec4 (position, 1.0);
     }
   `, 
   // Fragment shader
   glsl`
     precision mediump float;
-
     uniform vec3 uColor;
     uniform float uTime;
-
     varying vec2 vUv;
-
     void main() {
       gl_FragColor = vec4(sin(uTime), 0.5, 1.0, 0.5);
     }
@@ -90,12 +74,9 @@ const DitherShaderMaterial = shaderMaterial(
   // Vertex Shader
   glsl`
     precision mediump float;
-
     varying vec2 vUv;
-
     void main() {
       vUv = uv;
-
       gl_Position = projectionMatrix * modelViewMatrix * vec4 (position, 1.0);
     }
   `, 
@@ -103,14 +84,68 @@ const DitherShaderMaterial = shaderMaterial(
   // Fragment shader
   glsl`
     precision mediump float;
-
     uniform vec3 uColor;
     uniform float uTime;
-
     #pragma glslify: dither = require(glsl-dither);
-
     varying vec2 vUv;
+    void main() {
+      vec4 color = vec4(sin(uColor.x + uTime), 0.5, 1.0, 0.5);
+      gl_FragColor = dither(gl_FragCoord.xy, color);
+    }
+  `
+);
 
+const GraceWaveShaderMaterial = shaderMaterial(
+  // Uniform
+  { uTime: 0, uColor: new THREE.Color(0.0, 0.0, 0.0) }, 
+  // Vertex Shader
+  glsl`
+    precision mediump float;
+    varying vec2 vUv;
+    uniform float uTime;
+    #pragma glslify: snoise3 = require(glsl-noise/simplex/3d);
+    void main() {
+      vUv = uv;
+      
+      vec3 pos = position;
+      float noiseFreq = 1.5;
+      float noiseAmp = 0.25;
+      vec3 noisePos = vec3(pos.x * -noiseFreq + uTime, pos.y, pos.z);
+      pos.x -= snoise3(noisePos) * noiseAmp;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4 (pos, 1.0);
+    }
+  `, 
+  // Fragment shader
+  glsl`
+    precision mediump float;
+    uniform vec3 uColor;
+    uniform float uTime;
+    varying vec2 vUv;
+    void main() {
+      gl_FragColor = vec4(sin(vUv.x - uTime), 0.8, 0.7, 0.5);
+    }
+  `
+);
+
+const GraceGradientShaderMaterial = shaderMaterial(
+  // Uniform
+  { uTime: 0, uColor: new THREE.Color(0.0, 0.0, 0.0) }, 
+  // Vertex Shader
+  glsl`
+    precision mediump float;
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4 (position, 1.0);
+    }
+  `, 
+  // Fragment shader
+  glsl`
+    precision mediump float;
+    uniform vec3 uColor;
+    uniform float uTime;
+    #pragma glslify: dither = require(glsl-dither);
+    varying vec2 vUv;
     void main() {
       vec4 color = vec4(sin(uColor.x + uTime), 0.5, 1.0, 0.5);
       gl_FragColor = dither(gl_FragCoord.xy, color);
@@ -121,6 +156,8 @@ const DitherShaderMaterial = shaderMaterial(
 extend({ WaveShaderMaterial });
 extend({ GradientShaderMaterial });
 extend({ DitherShaderMaterial });
+extend({ GraceWaveShaderMaterial });
+extend({ GraceGradientShaderMaterial });
 
 const BG = () => {
   const ref = useRef();
@@ -136,7 +173,7 @@ const Sphere = (props) => {
   const ref = useRef();
   // useFrame(({clock}) => (ref.current.uTime = clock.getElapsedTime()));
   return (
-    <mesh scale={props.scale} position={[0.5, 0, 0]}>
+    <mesh scale={props.scale} position={[0.7, 0, 0]}>
       <sphereBufferGeometry args={[0.4, 32.0, 32.0]} />
       <waveShaderMaterial uTime={clock.getElapsedTime()} uColor={"hotpink"} ref={ref} wireframe />
     </mesh>
@@ -154,26 +191,57 @@ const Frames = (props) => {
 }
 
 const SphereFrame = (props) => {
-  const texture = useTexture(require('./Dali.jpeg'));
+  //const texture = useTexture(require('./Dali.jpeg'));
   const ref = useRef();
   return (
     <mesh position={props.position}>
       <planeBufferGeometry args={[0.5, 0.8, 16, 16]} />
-      <waveShaderMaterial uTime={clock.getElapsedTime()} uColor={"green"} uTexture={texture} ref={ref} />
+      <waveShaderMaterial uTime={clock.getElapsedTime()} uColor={"green"} ref={ref} />
+      {/* uTexture={texture} */}
     </mesh> 
   )
 }
 
-function Image() {
-  const texture = useTexture(require('./Dali.jpeg'));
+const GraceSphere = (props) => {
   const ref = useRef();
   return (
-    <mesh >
-      <boxGeometry args={[0.5, 0.5, 0.5]} />
-      <meshStandardMaterial uTime={clock.getElapsedTime()} color={0xaaa9ad} map={texture} ref={ref}/>
+    <mesh scale={props.scale} position={[0, 0, 0]}>
+      <icosahedronBufferGeometry args={[0.4, 3.0]} />
+      <graceWaveShaderMaterial uTime={clock.getElapsedTime()} uColor={"hotpink"} ref={ref} wireframe />
     </mesh>
   )
 }
+
+const GraceSphere2 = (props) => {
+  const ref = useRef();
+  return (
+    <mesh scale={props.scale} position={[-0.7, 0, 0]}>
+      <icosahedronBufferGeometry args={[0.275, 1.0]} />
+      <waveShaderMaterial uTime={clock.getElapsedTime()} uColor={"hotpink"} ref={ref} wireframe />
+    </mesh>
+  )
+}
+
+const GraceSphereFrame = (props) => {
+  const ref = useRef();
+  return (
+    <mesh position={props.position}>
+      <planeBufferGeometry args={[0.5, 0.8, 16, 16]} />
+      <graceWaveShaderMaterial uTime={clock.getElapsedTime()} uColor={"green"} ref={ref} />
+    </mesh> 
+  )
+}
+
+// function Image() {
+//   const texture = useTexture(require('./Dali.jpeg'));
+//   const ref = useRef();
+//   return (
+//     <mesh >
+//       <boxGeometry args={[0.5, 0.5, 0.5]} />
+//       <meshStandardMaterial uTime={clock.getElapsedTime()} color={0xaaa9ad} map={texture} ref={ref}/>
+//     </mesh>
+//   )
+// }
 
 
 
@@ -334,19 +402,48 @@ class App extends React.Component {
               <BG />
               
               <Sphere scale={s1}/>
+              <GraceSphere scale={s3}/>
+              <GraceSphere2 scale={s5}/>
 
               <Frames position={[-1.5, 0.0, -3]}/>
-              <Frames position={[-0.95, 0.0, -3]}/>
-              <Frames position={[-0.4, 0.0, -3]}/>
+              <Frames position={[-0.9, 0.0, -3]}/>
+              <Frames position={[-0.3, 0.0, -3]}/>
+              <Frames position={[0.3, 0.0, -3]}/>
+              <Frames position={[0.9, 0.0, -3]}/>
+              <Frames position={[1.5, 0.0, -3]}/>
 
-              <SphereFrame position={[0.8, 0.0, -3]}/>
+              <SphereFrame position={[1.2, 0.0, -3]}/>
+              <GraceSphereFrame position={[0, 0.0, -3]}/>
+              <SphereFrame position={[-1.2, 0.0, -3]}/>
 
-              <mesh scale={s1} position={[0.5, 0, 0]} >
+              <mesh scale={s1} position={[0.7, 0, 0]} >
                 <sphereGeometry args={[0.2, 64, 64]} />
                 <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
               </mesh>
 
-              <Image scale={s1} position={[1, 1, 1]}/>
+              <mesh scale={s3} position={[0, 0, 0]} >
+                <sphereGeometry args={[0.1, 64, 64]} />
+                <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
+              </mesh>
+              <mesh scale={s3} position={[0, 0, 0]} >
+                <torusGeometry args={[0.2, 0.05, 64, 64]} />
+                <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
+              </mesh>
+
+              <mesh scale={s5} position={[-0.7, 0, 0]} >
+                <sphereGeometry args={[0.045, 64, 64]} />
+                <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
+              </mesh>
+              <mesh scale={s5} position={[-0.7, 0, 0]} >
+                <torusGeometry args={[0.085, 0.025, 64, 64]} />
+                <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
+              </mesh>
+              <mesh scale={s5} position={[-0.7, 0, 0]} >
+                <torusGeometry args={[0.15, 0.025, 64, 64]} />
+                <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
+              </mesh>
+
+              {/* <Image scale={s1} position={[1, 1, 1]}/> */}
 
               {/* <mesh scale={s7} position={[1.5, 0.4, -5]} >
                 <sphereGeometry args={[0.2, 64, 64]} />
