@@ -171,7 +171,6 @@ const BG = () => {
 
 const Sphere = (props) => {
   const ref = useRef();
-  // useFrame(({clock}) => (ref.current.uTime = clock.getElapsedTime()));
   return (
     <mesh scale={props.scale} position={[0.7, 0, 0]}>
       <sphereBufferGeometry args={[0.4, 32.0, 32.0]} />
@@ -191,13 +190,11 @@ const Frames = (props) => {
 }
 
 const SphereFrame = (props) => {
-  //const texture = useTexture(require('./Dali.jpeg'));
   const ref = useRef();
   return (
     <mesh position={props.position}>
       <planeBufferGeometry args={[0.5, 0.8, 16, 16]} />
       <waveShaderMaterial uTime={clock.getElapsedTime()} uColor={"green"} ref={ref} />
-      {/* uTexture={texture} */}
     </mesh> 
   )
 }
@@ -216,7 +213,7 @@ const GraceSphere2 = (props) => {
   const ref = useRef();
   return (
     <mesh scale={props.scale} position={[-0.7, 0, 0]}>
-      <icosahedronBufferGeometry args={[0.275, 1.0]} />
+      <icosahedronBufferGeometry args={[0.3, 1.0]} />
       <waveShaderMaterial uTime={clock.getElapsedTime()} uColor={"hotpink"} ref={ref} wireframe />
     </mesh>
   )
@@ -231,18 +228,6 @@ const GraceSphereFrame = (props) => {
     </mesh> 
   )
 }
-
-// function Image() {
-//   const texture = useTexture(require('./Dali.jpeg'));
-//   const ref = useRef();
-//   return (
-//     <mesh >
-//       <boxGeometry args={[0.5, 0.5, 0.5]} />
-//       <meshStandardMaterial uTime={clock.getElapsedTime()} color={0xaaa9ad} map={texture} ref={ref}/>
-//     </mesh>
-//   )
-// }
-
 
 
 //UI editor
@@ -386,18 +371,6 @@ class App extends React.Component {
         <div >
           <Canvas style={{ height: `500px` }} dpr={[1, 2]} camera={{ position: [0, 0, 5], fov: 10, near: 0.1 }} onpmrthographic={ true }>
             <Suspense fallback={null}>
-              {/* <mesh scale={5}>
-                <sphereGeometry args={[1, 64, 64]} />
-                <LayerMaterial attach="material" side={THREE.BackSide}>
-                  <Color color={0xff4eb8} alpha={1} mode="normal" />
-                  <Depth colorA={0xff8f00} colorB={0x00ffff} alpha={0.5} mode="normal" near={0} far={300} origin={[100, 100, 100]} />
-                </LayerMaterial>
-              </mesh> */}
-
-              {/* <mesh>
-                <planeBufferGeometry args={[3, 5]}/>
-                <waveShaderMaterial uColor={"hotpink"}/>
-              </mesh> */}
 
               <BG />
               
@@ -443,79 +416,8 @@ class App extends React.Component {
                 <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
               </mesh>
 
-              {/* <Image scale={s1} position={[1, 1, 1]}/> */}
-
-              {/* <mesh scale={s7} position={[1.5, 0.4, -5]} >
-                <sphereGeometry args={[0.2, 64, 64]} />
-                <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
-              </mesh> */}
-
-
-              {/* 1.6 */}
-              {/* <mesh scale={s1} position={[Math.sin(clock.getElapsedTime()), Math.cos(clock.getElapsedTime()), 0]} rotation={[clock.getElapsedTime(), 0, 0]}>
-                <sphereGeometry args={[0.2, 64, 64]} />
-                <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
-              </mesh>
-
-              <mesh scale={s2} position={[-0.5, 0.5, 0]} >
-                <sphereGeometry args={[0.2, 64, 64]} />
-                <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
-              </mesh>
-
-              <mesh scale={s3} position={[0.5, 0.5, 0]} >
-                <sphereGeometry args={[0.2, 64, 64]} />
-                <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
-              </mesh>
-
-              <mesh scale={s4} position={[1.6, 0.5, 0]} >
-                <sphereGeometry args={[0.2, 64, 64]} />
-                <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
-              </mesh>
-
-              <mesh scale={s5} position={[-1.6, -0.5, 0]} >
-                <sphereGeometry args={[0.2, 64, 64]} />
-                <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
-              </mesh>
-              
-              <mesh scale={s6} position={[-0.5, -0.5, 0]} >
-                <sphereGeometry args={[0.2, 64, 64]} />
-                <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
-              </mesh>
-
-              <mesh scale={s7} position={[0.5, -0.5, 0]} >
-                <sphereGeometry args={[0.2, 64, 64]} />
-                <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
-              </mesh>
-              
-              <mesh scale={s8} position={[1.6, -0.5, 0]} >
-                <sphereGeometry args={[0.2, 64, 64]} />
-                <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
-              </mesh>
-
-              <mesh scale={40} position={[0, 0, 0]} >
-                <sphereGeometry args={[0.2, 64, 64]} />
-                <meshStandardMaterial attach="material" color="hotpink" transparent />
-              </mesh>
-
-
-              <mesh scale={10}>
-                <boxGeometry args={[1, 1, 1]} />
-                <meshBasicMaterial color={0xffffff} />
-              </mesh>
-
-              <mesh
-                scale={2}
-                position={[1.6, -0.5, -10.0]}
-                rotation={[Math.PI / 2, 0, 0]}
-              >
-                <sphereGeometry attach="geometry" args={[1, 16, 16]} />
-                <meshStandardMaterial attach="material" color="hotpink" transparent />
-              </mesh> */}
-
               <OrbitControls />
-              {/* <pointLight position={[10, 10, 5]} /> */}
               <pointLight position={[500, 500, 0]} />
-              {/* <pointLight position={[-10, -10, -5]} color={this.state.colorA} /> */}
               <ambientLight intensity={0.4} />
               <Environment preset="warehouse" />
             </Suspense>
