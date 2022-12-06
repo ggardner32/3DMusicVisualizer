@@ -2,7 +2,7 @@ import React from "react";
 import * as THREE from 'three'
 import { Canvas, extend, useFrame } from '@react-three/fiber'
 import { useRef, Suspense } from 'react';
-import { OrbitControls, Environment, useTexture } from '@react-three/drei'
+import { OrbitControls, Environment, useTexture, useGLTF } from '@react-three/drei'
 import { LayerMaterial, Color, Depth, Fresnel, Noise } from 'lamina'
 import { useControls } from 'leva'
 import './App.css';
@@ -11,11 +11,22 @@ import { shaderMaterial } from "@react-three/drei";
 import glsl from "babel-plugin-glsl/macro";
 
 //From testing 3d model imports
-//import { Test } from './components/test';
+//import { Model } from './Model';
+import { Model } from './Mesh';
 //import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 
 var clock = new THREE.Clock();
+
+// function Model({...props}) {
+//   const group = useRef()
+//   const { nodes, materials } = useGLTF('/mesh.gltf')
+//   return (
+//     <group ref={group} {...props} dispose={null}>
+//       <mesh geometry={nodes.pMesh1.geometry} material={nodes.pMesh1.material} />
+//     </group>
+//   )
+// }
 
 const WaveShaderMaterial = shaderMaterial(
   // Uniform
@@ -212,6 +223,20 @@ const GraceSphereFrame = (props) => {
   )
 }
 
+// const Star = (props) => {
+//   const { nodes, materials } = useGLTF("./mesh.gltf");
+//   return (
+//     <group {...props} dispose={null}>
+//       <mesh
+//         castShadow
+//         receiveShadow
+//         geometry={nodes.pMesh1.geometry}
+//         material={nodes.pMesh1.material}
+//       />
+//     </group>
+//   )
+// }
+
 //From testing 3d model imports
 // const loader = new GLTFLoader()
 // loader.load('components/test.gltf', function(gltf){
@@ -363,6 +388,8 @@ class App extends React.Component {
 
               <BG />
 
+              {/* <Model scale={0.1} /> */}
+
               {/* Background frames */}
               <Frames position={[-1.5, 0.0, -3]}/>
               <Frames position={[-0.9, 0.0, -3]}/>
@@ -410,6 +437,8 @@ class App extends React.Component {
                 <torusGeometry args={[0.15, 0.025, 64, 64]} />
                 <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
               </mesh>
+
+              
 
               <OrbitControls />
               <pointLight position={[500, 500, 0]} />
