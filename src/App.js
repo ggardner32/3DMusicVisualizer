@@ -10,6 +10,11 @@ import AudioAnalyzer from './AudioAnalyzer';
 import { shaderMaterial } from "@react-three/drei";
 import glsl from "babel-plugin-glsl/macro";
 
+//From testing 3d model imports
+//import { Test } from './components/test';
+//import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+
+
 var clock = new THREE.Clock();
 
 const WaveShaderMaterial = shaderMaterial(
@@ -95,6 +100,8 @@ const DitherShaderMaterial = shaderMaterial(
   `
 );
 
+
+//Basically the same as the other wave shader but some values inverted
 const GraceWaveShaderMaterial = shaderMaterial(
   // Uniform
   { uTime: 0, uColor: new THREE.Color(0.0, 0.0, 0.0) }, 
@@ -127,37 +134,10 @@ const GraceWaveShaderMaterial = shaderMaterial(
   `
 );
 
-const GraceGradientShaderMaterial = shaderMaterial(
-  // Uniform
-  { uTime: 0, uColor: new THREE.Color(0.0, 0.0, 0.0) }, 
-  // Vertex Shader
-  glsl`
-    precision mediump float;
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4 (position, 1.0);
-    }
-  `, 
-  // Fragment shader
-  glsl`
-    precision mediump float;
-    uniform vec3 uColor;
-    uniform float uTime;
-    #pragma glslify: dither = require(glsl-dither);
-    varying vec2 vUv;
-    void main() {
-      vec4 color = vec4(sin(uColor.x + uTime), 0.5, 1.0, 0.5);
-      gl_FragColor = dither(gl_FragCoord.xy, color);
-    }
-  `
-);
-
 extend({ WaveShaderMaterial });
 extend({ GradientShaderMaterial });
 extend({ DitherShaderMaterial });
 extend({ GraceWaveShaderMaterial });
-extend({ GraceGradientShaderMaterial });
 
 const BG = () => {
   const ref = useRef();
@@ -199,6 +179,7 @@ const SphereFrame = (props) => {
   )
 }
 
+//Middle wireframe, adjust 2nd parameter of icosahedronBufferGeometry to change wireframe density
 const GraceSphere = (props) => {
   const ref = useRef();
   return (
@@ -209,6 +190,7 @@ const GraceSphere = (props) => {
   )
 }
 
+//Left most sphere, adjust 2nd parameter of icosahedronBufferGeometry to change wireframe density
 const GraceSphere2 = (props) => {
   const ref = useRef();
   return (
@@ -219,6 +201,7 @@ const GraceSphere2 = (props) => {
   )
 }
 
+//Inverted sphere frame, used for middle shader
 const GraceSphereFrame = (props) => {
   const ref = useRef();
   return (
@@ -228,6 +211,12 @@ const GraceSphereFrame = (props) => {
     </mesh> 
   )
 }
+
+//From testing 3d model imports
+// const loader = new GLTFLoader()
+// loader.load('components/test.gltf', function(gltf){
+//   const Root = gltf.scene;
+// })
 
 
 //UI editor
@@ -373,11 +362,8 @@ class App extends React.Component {
             <Suspense fallback={null}>
 
               <BG />
-              
-              <Sphere scale={s1}/>
-              <GraceSphere scale={s3}/>
-              <GraceSphere2 scale={s5}/>
 
+              {/* Background frames */}
               <Frames position={[-1.5, 0.0, -3]}/>
               <Frames position={[-0.9, 0.0, -3]}/>
               <Frames position={[-0.3, 0.0, -3]}/>
@@ -385,15 +371,23 @@ class App extends React.Component {
               <Frames position={[0.9, 0.0, -3]}/>
               <Frames position={[1.5, 0.0, -3]}/>
 
+              {/* Sphere wireframes */}
+              <Sphere scale={s1}/>
+              <GraceSphere scale={s3}/>
+              <GraceSphere2 scale={s5}/>
+
+              {/* Frames behind spheres */}
               <SphereFrame position={[1.2, 0.0, -3]}/>
               <GraceSphereFrame position={[0, 0.0, -3]}/>
               <SphereFrame position={[-1.2, 0.0, -3]}/>
 
+              {/* Right most sphere. Using frequency 1 */}
               <mesh scale={s1} position={[0.7, 0, 0]} >
                 <sphereGeometry args={[0.2, 64, 64]} />
                 <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
               </mesh>
 
+              {/* Middle sphere + torus. Using frequency 2 */}
               <mesh scale={s3} position={[0, 0, 0]} >
                 <sphereGeometry args={[0.1, 64, 64]} />
                 <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
@@ -403,6 +397,7 @@ class App extends React.Component {
                 <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
               </mesh>
 
+              {/* Left most sphere + torus + torus. Using frequency 3 */}
               <mesh scale={s5} position={[-0.7, 0, 0]} >
                 <sphereGeometry args={[0.045, 64, 64]} />
                 <meshPhysicalMaterial color={0xaaa9ad} depthWrite={false} transmission={1} thickness={10} roughness={r} />
